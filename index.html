@@ -283,12 +283,32 @@
                 if (data.error) {
                     throw new Error(data.error.message || "Error en los servidores de la API.");
                 }
+            const prompt = "Actúa como un experto en redes sociales. Toma el siguiente texto y genera un post para LinkedIn y un tuit para X/Twitter. Separa ambas respuestas poniendo la palabra exacta [SEPARADOR] en una línea en el medio de las dos. Texto base:\n\n" + textoOriginal;
 
+            try {
+                // Endpoint actualizado compatible con las nuevas credenciales de Google
+                const url = "https://googleapis.com" + apiKey;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message || "Error en las credenciales.");
+                }
+
+                // Extracción corregida para el nuevo formato de respuesta
                 const respuestaIA = data.candidates[0].content.parts[0].text;
                 const partes = respuestaIA.split('[SEPARADOR]');
                 
-                let postLinkedIn = partes[0] ? partes[0].trim() : 'No se pudo generar el formato para LinkedIn.';
-                let postTwitter = partes[1] ? partes[1].trim() : 'No se pudo generar el formato para X/Twitter.';
+                let postLinkedIn = partes[0] ? partes[0].trim() : 'No se pudo generar LinkedIn.';
+                let postTwitter = partes[1] ? partes[1].trim() : 'No se pudo generar X/Twitter.';
 
                 document.getElementById('linkedinPost').innerText = postLinkedIn;
                 document.getElementById('twitterPost').innerText = postTwitter;
@@ -309,9 +329,10 @@
             navigator.clipboard.writeText(textToCopy).then(() => {
                 alert("¡Texto copiado al portapapeles con éxito! 🎉");
             }).catch(err => {
-                alert("No se pudo copiar automáticamente, por favor selecciónalo manualmente.");
+                alert("Por favor, selecciónalo manualmente para copiar.");
             });
         }
     </script>
 </body>
 </html>
+
