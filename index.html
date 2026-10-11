@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Content Repurposer</title>
     <style>
-        /* Diseño base con CSS Puro para evitar dependencias externas en celulares */
+        /* Diseño base nativo para celulares */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -15,7 +15,7 @@
             background-color: #0f172a;
             color: #f1f5f9;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            min-h: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -24,10 +24,10 @@
         header {
             border-bottom: 1px solid #1e293b;
             padding-bottom: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
-            items-center: center;
+            align-items: center;
         }
         h1 {
             font-size: 24px;
@@ -58,12 +58,33 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             margin-bottom: 20px;
         }
+        .card-config {
+            background-color: #111827;
+            border: 1px solid #e11d48;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
         label {
             display: block;
             font-size: 14px;
             color: #94a3b8;
             margin-bottom: 8px;
             font-weight: 500;
+        }
+        input[type="password"] {
+            width: 100%;
+            background-color: #020617;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 8px;
+        }
+        input:focus, textarea:focus {
+            border-color: #06b6d4;
         }
         textarea {
             width: 100%;
@@ -78,9 +99,6 @@
             transition: border 0.2s;
             resize: none;
         }
-        textarea:focus {
-            border-color: #06b6d4;
-        }
         .btn-primary {
             display: block;
             width: 100%;
@@ -94,9 +112,12 @@
             margin-top: 12px;
             cursor: pointer;
             box-shadow: 0 4px 6px -1px rgba(6, 182, 212, 0.2);
+            text-align: center;
         }
-        .btn-primary:active {
-            transform: scale(0.99);
+        .btn-primary:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            box-shadow: none;
         }
         #loader {
             display: none;
@@ -150,6 +171,12 @@
             border-radius: 8px;
             margin-top: 12px;
             cursor: pointer;
+            text-align: center;
+        }
+        .link-api {
+            color: #38bdf8;
+            text-decoration: underline;
+            font-size: 12px;
         }
         footer {
             text-align: center;
@@ -157,41 +184,41 @@
             font-size: 12px;
             color: #475569;
             border-top: 1px solid #1e293b;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Encabezado -->
     <header>
         <h1>🚀 MultiPost AI</h1>
-        <span class="version-badge">Prototipo v1.2</span>
+        <span class="version-badge">Prototipo v2.1 (IA Fixed)</span>
     </header>
 
-    <!-- Contenido Principal -->
     <main>
-        <!-- Panel de Entrada -->
+        <div class="card-config">
+            <label for="apiKey">🔑 Configuración de Google Gemini API Key:</label>
+            <input type="password" id="apiKey" placeholder="Pega tu clave AIzaSy... aquí" oninput="guardarKey()">
+            <a href="https://aistudio.google.com/" target="_blank" class="link-api">¿No tienes una clave? Consíguela gratis aquí</a>
+        </div>
+
         <div class="card">
             <label>Pega tu texto largo, artículo o idea base:</label>
             <textarea id="inputText" placeholder="Escribe o pega aquí tu contenido..."></textarea>
-            <button onclick="transformarContenido()" class="btn-primary">Transformar Contenido con IA</button>
+            <button onclick="transformarContenido()" id="btnSubmit" class="btn-primary">Transformar Contenido con IA</button>
         </div>
 
-        <!-- Pantalla de Carga -->
-        <div id="loader">⏳ Procesando y adaptando formatos...</div>
+        <div id="loader">⏳ Conectando con Gemini y redactando posts...</div>
 
-        <!-- Sección de Resultados -->
         <div id="resultsSection">
             <h3 class="section-title">✨ Contenido Optimizado</h3>
             
-            <!-- Tarjeta LinkedIn -->
             <div class="result-card">
                 <span class="badge badge-linkedin">LinkedIn</span>
                 <p id="linkedinPost" class="post-text"></p>
                 <button onclick="copiarTexto('linkedinPost')" class="btn-secondary">📋 Copiar Post</button>
             </div>
 
-            <!-- Tarjeta X -->
             <div class="result-card">
                 <span class="badge badge-twitter">X / Twitter</span>
                 <p id="twitterPost" class="post-text"></p>
@@ -200,43 +227,89 @@
         </div>
     </main>
 
-    <!-- Pie de página -->
     <footer>
         MultiPost AI App &copy; Todos los derechos reservados.
     </footer>
 
-    <!-- Lógica de Funcionamiento -->
     <script>
-        function transformarContenido() {
+        window.onload = function() {
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if (savedKey) {
+                document.getElementById('apiKey').value = savedKey;
+            }
+        }
+
+        function guardarKey() {
+            const key = document.getElementById('apiKey').value.trim();
+            localStorage.setItem('gemini_api_key', key);
+        }
+
+        async function transformarContenido() {
+            const apiKey = document.getElementById('apiKey').value.trim();
             const textoOriginal = document.getElementById('inputText').value.trim();
             
+            if (!apiKey) {
+                alert("Por favor, ingresa tu Gemini API Key en el panel rojo superior.");
+                return;
+            }
             if (!textoOriginal) {
-                alert("Por favor, ingresa algún texto primero.");
+                alert("Por favor, ingresa algún texto para transformar.");
                 return;
             }
 
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('resultsSection').style.display = 'none';
+            const loader = document.getElementById('loader');
+            const resultsSection = document.getElementById('resultsSection');
+            const btnSubmit = document.getElementById('btnSubmit');
 
-            setTimeout(() => {
-                const resumenBreve = textoOriginal.split('.').slice(0, 2).join('.') + '.';
+            loader.style.display = 'block';
+            resultsSection.style.display = 'none';
+            btnSubmit.disabled = true;
+
+            const prompt = "Actúa como un experto en redes sociales. Toma el siguiente texto y genera de forma independiente un post para LinkedIn y un tuit para X/Twitter. Separa obligatoriamente ambas respuestas poniendo únicamente la palabra [SEPARADOR] en una línea en el medio de las dos. Texto base:\n\n" + textoOriginal;
+
+            try {
+                const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
                 
-                const postLinkedIn = `💼 REPURPOSING TIP DE HOY\n\n¿Te cuesta crear contenido constante? No necesitas escribir desde cero todo el tiempo. La clave está en reciclar de forma inteligente.\n\n🎯 Idea principal:\n"${resumenBreve}"\n\n¿Qué opinas de esta estrategia? Te leo en los comentarios 👇\n\n#Productividad #MarketingDigital #CreadoresDeContenido`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
                 
-                const postTwitter = `🧵 Crear contenido no tiene por qué tomarte todo el día.\n\nAcá te dejo una idea clave para aplicar hoy mismo:\n\n"${resumenBreve.substring(0, 140)}..."\n\n¿Estás de acuerdo? Dejá tu RT o Like 🚀`;
+                if (data.error) {
+                    throw new Error(data.error.message || "Error en los servidores de la API.");
+                }
+
+                const respuestaIA = data.candidates[0].content.parts[0].text;
+                const partes = respuestaIA.split('[SEPARADOR]');
+                
+                let postLinkedIn = partes[0] ? partes[0].trim() : 'No se pudo generar el formato para LinkedIn.';
+                let postTwitter = partes[1] ? partes[1].trim() : 'No se pudo generar el formato para X/Twitter.';
 
                 document.getElementById('linkedinPost').innerText = postLinkedIn;
                 document.getElementById('twitterPost').innerText = postTwitter;
 
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('resultsSection').style.display = 'block';
-            }, 1200); 
+                resultsSection.style.display = 'block';
+
+            } catch (error) {
+                alert("Error de la IA: " + error.message);
+                console.error(error);
+            } finally {
+                loader.style.display = 'none';
+                btnSubmit.disabled = false;
+            }
         }
 
         function copiarTexto(idElemento) {
-            const texto = document.getElementById(idElemento).innerText;
-            navigator.clipboard.writeText(texto).then(() => {
+            const textToCopy = document.getElementById(idElemento).innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 alert("¡Texto copiado al portapapeles con éxito! 🎉");
+            }).catch(err => {
+                alert("No se pudo copiar automáticamente, por favor selecciónalo manualmente.");
             });
         }
     </script>
