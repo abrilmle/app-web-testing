@@ -4,68 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Content Repurposer</title>
+    <!-- Cargamos Tailwind CSS mediante una hoja de estilos estándar y directa para máxima compatibilidad -->
     <link href="https://cloudflare.com" rel="stylesheet">
+    <style>
+        /* Agregamos los estilos de fondo y gradientes nativos para asegurar que carguen sin depender de scripts */
+        body {
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+        .bg-gradient-custom {
+            background: linear-gradient(to right, #06b6d4, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-gradient {
+            background: linear-gradient(to right, #06b6d4, #d946ef);
+        }
+        .bg-card {
+            background-color: rgba(30, 41, 59, 0.5);
+            border-color: #334155;
+        }
+        .bg-input {
+            background-color: #020617;
+            border-color: #1e293b;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col justify-between">
+<body class="min-h-screen font-sans flex flex-col justify-between">
 
     <!-- Navbar / Encabezado -->
-    <header class="border-b border-slate-800 p-4 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-fuchsia-500 bg-clip-text text-transparent">
+    <header class="border-b border-gray-800 p-4 bg-slate-900 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center px-2">
+            <h1 class="text-xl font-bold bg-gradient-custom">
                 🚀 MultiPost AI
             </h1>
-            <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full border border-slate-700"> Prototipo v1.0 </span>
+            <span class="text-xs text-gray-400 px-2.5 py-1 rounded-full border border-gray-700 bg-gray-800"> Prototipo v1.1 </span>
         </div>
     </header>
 
     <!-- Contenido Principal -->
-    <main class="max-w-4xl w-full mx-auto p-4 flex-grow flex flex-col justify-center gap-6 my-8">
+    <main class="max-w-4xl w-full mx-auto p-4 flex-grow flex flex-col justify-center my-4">
         
         <!-- Sección de Entrada -->
-        <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-800 shadow-xl backdrop-blur">
-            <label class="block text-sm font-medium text-slate-400 mb-2">Pega tu texto largo, artículo o idea base:</label>
-            <textarea id="inputText" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all resize-none" placeholder="Escribe o pega aquí el contenido que quieres transformar..."></textarea>
+        <div class="bg-card p-6 rounded-2xl border shadow-xl mb-6">
+            <label class="block text-sm font-medium text-gray-400 mb-2">Pega tu texto largo, artículo o idea base:</label>
+            <textarea id="inputText" rows="5" class="w-full bg-input border rounded-xl p-4 text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all" style="resize: none;" placeholder="Escribe o pega aquí el contenido que quieres transformar..."></textarea>
             
-            <button onclick="transformarContenido()" class="mt-4 w-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 hover:from-cyan-600 hover:to-fuchsia-600 text-white font-semibold py-3 px-6 rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-cyan-500/20">
+            <button onclick="transformarContenido()" class="mt-4 w-full btn-gradient hover:opacity-90 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg text-center block">
                 Transformar Contenido con IA
             </button>
         </div>
 
         <!-- Pantalla de Carga (Oculta por defecto) -->
         <div id="loader" class="hidden text-center py-8">
-            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-cyan-500 mx-auto mb-3"></div>
-            <p class="text-slate-400 text-sm animate-pulse">Procesando y adaptando formatos...</p>
+            <p class="text-gray-400 text-sm animate-pulse">⏳ Procesando y adaptando formatos...</p>
         </div>
 
         <!-- Sección de Resultados (Oculta hasta que haya datos) -->
         <div id="resultsSection" class="hidden space-y-6">
-            <h3 class="text-lg font-semibold text-slate-300 flex items-center gap-2">
+            <h3 class="text-lg font-semibold text-gray-300 px-1">
                 ✨ Contenido Optimizado
             </h3>
             
-            <div class="grid md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Tarjeta LinkedIn -->
-                <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                <div class="bg-card border rounded-2xl p-5 flex flex-col justify-between mb-4 md:mb-0">
                     <div>
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded">LinkedIn</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-900 bg-opacity-20 px-2 py-0.5 rounded">LinkedIn</span>
                         </div>
-                        <p id="linkedinPost" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line"></p>
+                        <p id="linkedinPost" class="text-gray-300 text-sm leading-relaxed" style="white-space: pre-line;"></p>
                     </div>
-                    <button onclick="copiarTexto('linkedinPost')" class="mt-4 text-xs bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                    <button onclick="copiarTexto('linkedinPost')" class="mt-4 text-xs bg-black border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-gray-200 py-2 px-3 rounded-lg transition-all w-full text-center">
                         📋 Copiar Post
                     </button>
                 </div>
 
                 <!-- Tarjeta X (Twitter) -->
-                <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                <div class="bg-card border rounded-2xl p-5 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="text-xs font-bold uppercase tracking-wider text-fuchsia-400 bg-fuchsia-500/10 px-2 py-0.5 rounded">X / Twitter</span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-900 bg-opacity-20 px-2 py-0.5 rounded">X / Twitter</span>
                         </div>
-                        <p id="twitterPost" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line"></p>
+                        <p id="twitterPost" class="text-gray-300 text-sm leading-relaxed" style="white-space: pre-line;"></p>
                     </div>
-                    <button onclick="copiarTexto('twitterPost')" class="mt-4 text-xs bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                    <button onclick="copiarTexto('twitterPost')" class="mt-4 text-xs bg-black border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-gray-200 py-2 px-3 rounded-lg transition-all w-full text-center">
                         📋 Copiar Post
                     </button>
                 </div>
@@ -75,7 +98,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="text-center py-4 text-xs text-slate-600 border-t border-slate-900">
+    <footer class="text-center py-4 text-xs text-gray-600 border-t border-gray-900 mt-4">
         MultiPost AI App &copy; Todos los derechos reservados.
     </footer>
 
@@ -89,29 +112,22 @@
                 return;
             }
 
-            // Mostramos el loader y ocultamos resultados previos
-            document.getElementById('loader').classList.remove('hidden');
-            document.getElementById('resultsSection').classList.add('hidden');
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
 
-            // Simulamos el procesamiento de IA (En producción aquí se conectaría con la API de OpenAI/Gemini)
             setTimeout(() => {
-                // Lógica de simulación de formatos optimizados
                 const resumenBreve = textoOriginal.split('.').slice(0, 2).join('.') + '.';
                 
-                // Formato LinkedIn: Profesional, estructurado, con emojis y hashtags
                 const postLinkedIn = `💼 REPURPOSING TIP DE HOY\n\n¿Te cuesta crear contenido constante? No necesitas escribir desde cero todo el tiempo. La clave está en reciclar de forma inteligente.\n\n🎯 Idea principal:\n"${resumenBreve}"\n\n¿Qué opinas de esta estrategia? Te leo en los comentarios 👇\n\n#Productividad #MarketingDigital #CreadoresDeContenido`;
                 
-                // Formato X (Twitter): Corto, al grano, estilo gancho (hook)
                 const postTwitter = `🧵 Crear contenido no tiene por qué tomarte todo el día.\n\nAcá te dejo una idea clave para aplicar hoy mismo:\n\n"${resumenBreve.substring(0, 140)}..."\n\n¿Estás de acuerdo? Dejá tu RT o Like 🚀`;
 
-                // Insertamos los textos generados en la interfaz visual
                 document.getElementById('linkedinPost').innerText = postLinkedIn;
                 document.getElementById('twitterPost').innerText = postTwitter;
 
-                // Ocultamos loader y mostramos los resultados con el nuevo diseño
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('resultsSection').classList.remove('hidden');
-            }, 1500); // Simulamos 1.5 segundos de retraso de procesamiento
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('resultsSection').style.display = 'block';
+            }, 1200); 
         }
 
         function copiarTexto(idElemento) {
@@ -119,7 +135,6 @@
             navigator.clipboard.writeText(texto).then(() => {
                 alert("¡Texto copiado al portapapeles con éxito! 🎉");
             });
-            // El API de portapapeles funciona de forma directa y asíncrona
         }
     </script>
 </body>
